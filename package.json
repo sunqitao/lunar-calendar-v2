@@ -1,0 +1,13 @@
+{
+  "name": "lunar-calendar-v2-unix",
+  "version": "2.0.0",
+  "description": "纯净万年历 APP v2.0 - 苹果风格 (uni-app-x)",
+  "main": "main.js",
+  "scripts": {
+    "dev:app": "uni -p app",
+    "build:app": "uni build -p app"
+  },
+  "uni-app": {
+    "scripts": {}
+  }
+}

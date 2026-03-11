@@ -1,0 +1,320 @@
+<template>
+  <view class="container">
+    <!-- 月份导航栏 -->
+    <view class="month-header">
+      <view class="nav-btn" @click="prevMonth">
+        <text class="nav-icon">‹</text>
+      </view>
+      <text class="month-title">{{ currentYear }}年{{ currentMonth }}月</text>
+      <view class="nav-btn" @click="nextMonth">
+        <text class="nav-icon">›</text>
+      </view>
+    </view>
+
+    <!-- 星期标题 -->
+    <view class="weekday-header">
+      <text class="weekday-cell" v-for="(day, idx) in weekdays" :key="idx" :class="{ weekend: idx === 0 || idx === 6 }">
+        {{ day }}
+      </text>
+    </view>
+
+    <!-- 日历网格 -->
+    <view class="calendar-grid">
+      <view
+        v-for="(cell, idx) in calendarDays"
+        :key="idx"
+        class="date-cell"
+        :class="{
+          'other-month': !cell.isCurrentMonth,
+          'today': cell.isToday,
+          'selected': cell.isSelected,
+          'holiday': cell.isHoliday
+        }"
+        @click="selectDate(cell)"
+      >
+        <text class="date-number">{{ cell.day }}</text>
+        <text class="date-lunar">{{ cell.lunarDay }}</text>
+      </view>
+    </view>
+
+    <!-- 农历信息卡片 -->
+    <view class="lunar-card">
+      <text class="lunar-date">{{ selectedLunarText }}</text>
+      <view class="lunar-info">
+        <text class="lunar-text">生肖：{{ selectedShengxiao }}</text>
+        <text class="lunar-text">干支：{{ selectedGanzhi }}</text>
+      </view>
+      <view class="lunar-yiji">
+        <view class="yi-row">
+          <text class="yi-label">宜</text>
+          <text class="yi-text">{{ selectedYi || '无' }}</text>
+        </view>
+        <view class="ji-row">
+          <text class="ji-label">忌</text>
+          <text class="ji-text">{{ selectedJi || '无' }}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+// 引入 lunar-javascript (需转换为 uts 或使用兼容方式)
+// 注意：uni-app-x 使用 uts 语言，这里使用简化版本
+
+export default {
+  data() {
+    return {
+      currentDate: new Date(),
+      selectedDate: new Date(),
+      weekdays: ['日', '一', '二', '三', '四', '五', '六'],
+      selectedLunarText: '',
+      selectedShengxiao: '',
+      selectedGanzhi: '',
+      selectedYi: '',
+      selectedJi: '',
+      holidays: ['1-1', '5-1', '10-1']
+    }
+  },
+  computed: {
+    currentYear() {
+      return this.currentDate.getFullYear()
+    },
+    currentMonth() {
+      return this.currentDate.getMonth() + 1
+    },
+    calendarDays() {
+      const year = this.currentYear
+      const month = this.currentDate.getMonth()
+      const firstDay = new Date(year, month, 1)
+      const startWeekday = firstDay.getDay()
+      const daysInMonth = new Date(year, month + 1, 0).getDate()
+      const prevMonthDays = new Date(year, month, 0).getDate()
+      
+      const days = []
+      
+      // 上个月日期
+      for (let i = startWeekday - 1; i >= 0; i--) {
+        const day = prevMonthDays - i
+        const date = new Date(year, month - 1, day)
+        days.push(this.createDayCell(date, false))
+      }
+      
+      // 当月日期
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day)
+        days.push(this.createDayCell(date, true))
+      }
+      
+      // 下个月日期
+      const remaining = 42 - days.length
+      for (let day = 1; day <= remaining; day++) {
+        const date = new Date(year, month + 1, day)
+        days.push(this.createDayCell(date, false))
+      }
+      
+      return days
+    }
+  },
+  mounted() {
+    this.updateLunarInfo(this.selectedDate)
+  },
+  methods: {
+    createDayCell(date, isCurrentMonth) {
+      const today = new Date()
+      const isToday = date.toDateString() === today.toDateString()
+      const isSelected = date.toDateString() === this.selectedDate.toDateString()
+      const isHoliday = this.isHoliday(date)
+      
+      return {
+        date,
+        day: date.getDate(),
+        lunarDay: this.getLunarDay(date),
+        isCurrentMonth,
+        isToday,
+        isSelected,
+        isHoliday
+      }
+    },
+    isHoliday(date) {
+      const key = `${date.getMonth() + 1}-${date.getDate()}`
+      return this.holidays.includes(key)
+    },
+    getLunarDay(date) {
+      // 简化农历显示（实际项目需集成 lunar-javascript）
+      const days = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+                   '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+                   '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十']
+      return days[date.getDate() % 30] || '初一'
+    },
+    updateLunarInfo(date) {
+      // 简化农历信息（实际项目需集成 lunar-javascript）
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      this.selectedLunarText = `${year}年${month}月${day}日`
+      this.selectedShengxiao = '蛇'
+      this.selectedGanzhi = '乙巳年'
+      this.selectedYi = '祭祀、祈福'
+      this.selectedJi = '嫁娶、动土'
+    },
+    prevMonth() {
+      this.currentDate = new Date(this.currentYear, this.currentMonth - 2, 1)
+    },
+    nextMonth() {
+      this.currentDate = new Date(this.currentYear, this.currentMonth, 1)
+    },
+    selectDate(cell) {
+      this.selectedDate = cell.date
+      this.updateLunarInfo(cell.date)
+    }
+  }
+}
+</script>
+
+<style>
+.container {
+  flex: 1;
+  flex-direction: column;
+  background-color: #FFFFFF;
+  padding: 16px;
+  padding-top: 60px;
+}
+
+.month-header {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 24px;
+}
+
+.nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: #F2F2F7;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon {
+  font-size: 28px;
+  color: #000000;
+}
+
+.month-title {
+  font-size: 34px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.weekday-header {
+  flex-direction: row;
+  padding: 8px 0;
+  border-bottom-width: 1px;
+  border-bottom-color: #C6C6C8;
+}
+
+.weekday-cell {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8E8E93;
+}
+
+.weekday-cell.weekend {
+  color: #FF3B30;
+}
+
+.calendar-grid {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.date-cell {
+  width: 14.28%;
+  aspect-ratio: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.date-cell.other-month {
+  opacity: 0.3;
+}
+
+.date-cell.today .date-number {
+  font-weight: 600;
+}
+
+.date-cell.holiday .date-number {
+  color: #FF3B30;
+}
+
+.date-number {
+  font-size: 28px;
+  color: #000000;
+}
+
+.date-lunar {
+  font-size: 12px;
+  color: #8E8E93;
+  margin-top: 2px;
+}
+
+.lunar-card {
+  flex-direction: column;
+  background-color: #F2F2F7;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.lunar-date {
+  font-size: 17px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 8px;
+}
+
+.lunar-info {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.lunar-text {
+  font-size: 13px;
+  color: #8E8E93;
+  margin-right: 16px;
+}
+
+.lunar-yiji {
+  flex-direction: column;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top-width: 1px;
+  border-top-color: #C6C6C8;
+}
+
+.yi-row, .ji-row {
+  flex-direction: row;
+  margin-top: 4px;
+}
+
+.yi-label, .ji-label {
+  font-weight: 600;
+  margin-right: 8px;
+  color: #000000;
+}
+
+.yi-text {
+  color: #34C759;
+}
+
+.ji-text {
+  color: #FF3B30;
+}
+</style>
