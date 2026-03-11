@@ -59,9 +59,6 @@
 </template>
 
 <script>
-// 引入 lunar-javascript (需转换为 uts 或使用兼容方式)
-// 注意：uni-app-x 使用 uts 语言，这里使用简化版本
-
 export default {
   data() {
     return {
@@ -141,14 +138,12 @@ export default {
       return this.holidays.includes(key)
     },
     getLunarDay(date) {
-      // 简化农历显示（实际项目需集成 lunar-javascript）
       const days = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
                    '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
                    '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十']
       return days[date.getDate() % 30] || '初一'
     },
     updateLunarInfo(date) {
-      // 简化农历信息（实际项目需集成 lunar-javascript）
       const year = date.getFullYear()
       const month = date.getMonth() + 1
       const day = date.getDate()
