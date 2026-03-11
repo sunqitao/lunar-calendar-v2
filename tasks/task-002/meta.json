@@ -1,0 +1,15 @@
+{
+  "taskId": "task-002",
+  "title": "UI 设计 - 苹果风格日历界面",
+  "status": "assigned",
+  "type": "finite",
+  "phase": 2,
+  "assigned_to": "ui-designer",
+  "created_at": "2026-03-11T04:00:00Z",
+  "assigned_at": "2026-03-11T04:00:00Z",
+  "estimated_hours": 2,
+  "priority": "high",
+  "dependencies": ["task-001"],
+  "room_id": "!qHL4ADbUYmopYOgmUN:matrix-local.hiclaw.io:18080",
+  "project_id": "lunar-calendar-v2"
+}
